@@ -1,0 +1,65 @@
+name: Bug report
+description: Report a reproducible defect without including sensitive data.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include credentials, personal data, database URLs, access tokens, or production exports.
+        Report security vulnerabilities privately according to SECURITY.md.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Employee workflow
+        - Safety review
+        - Supply Chain assignment
+        - Area Manager review
+        - Administration
+        - Authentication and authorization
+        - Excel or WhatsApp output
+        - Deployment and operations
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened, and what did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      placeholder: |
+        1. Sign in as...
+        2. Open...
+        3. Select...
+        4. Observe...
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: Local, staging, browser and version
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitized evidence
+      description: Add screenshots or logs only after removing sensitive information.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I removed secrets, personal data, and production details.
+          required: true
+        - label: This is not a security vulnerability.
+          required: true

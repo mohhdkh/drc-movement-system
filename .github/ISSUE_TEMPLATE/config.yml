@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security report
+    url: https://github.com/mohhdkh/drc-movement-system/blob/main/SECURITY.md
+    about: Report suspected vulnerabilities privately; do not open a public issue.

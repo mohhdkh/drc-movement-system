@@ -1,0 +1,46 @@
+name: Feature request
+description: Propose an improvement to the movement workflow or operations.
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: dropdown
+    id: role
+    attributes:
+      label: Primary role
+      options:
+        - Employee
+        - Safety
+        - Supply Chain
+        - Area Manager
+        - Administrator
+        - Operations / IT
+        - Multiple roles
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or need
+      description: Describe the operational problem, not only the proposed interface.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: What should authorized users be able to accomplish?
+    validations:
+      required: true
+  - type: textarea
+    id: controls
+    attributes:
+      label: Approval, audit, or security considerations
+      description: Note affected roles, approvals, data, reports, or integrations.
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      placeholder: |
+        - Given...
+        - When...
+        - Then...

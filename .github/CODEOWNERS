@@ -1,0 +1,6 @@
+* @mohhdkh
+
+/.github/ @mohhdkh
+/server/src/db/ @mohhdkh
+/server/src/middleware/ @mohhdkh
+/server/src/services/entraTokenVerifier.js @mohhdkh
