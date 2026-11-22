@@ -11,7 +11,7 @@
 
 <p align="center">
   <a href="https://github.com/mohhdkh/drc-movement-system/actions/workflows/ci.yml"><img src="https://github.com/mohhdkh/drc-movement-system/actions/workflows/ci.yml/badge.svg" alt="CI status" /></a>
-  <img src="https://img.shields.io/badge/Node.js-24-339933?logo=nodedotjs&logoColor=white" alt="Node.js 24" />
+  <img src="https://img.shields.io/badge/Node.js-22-339933?logo=nodedotjs&logoColor=white" alt="Node.js 22" />
   <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=111827" alt="React 19" />
   <img src="https://img.shields.io/badge/PostgreSQL-production-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL" />
   <img src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white" alt="Docker ready" />
@@ -80,7 +80,7 @@ flowchart TB
 | Layer | Technology |
 | --- | --- |
 | Client | React 19, TypeScript, Vite, React Router, MSAL |
-| API | Node.js 24, Express 5 |
+| API | Node.js 22, Express 5 |
 | Authentication | Microsoft Entra ID with local role authority |
 | Data | PostgreSQL in production; SQLite for local development and migration tooling |
 | Delivery | Multi-stage Docker image, free review and paid production Blueprints, GitHub Actions CI |
@@ -117,7 +117,7 @@ flowchart TB
 
 ### Prerequisites
 
-- Node.js 24
+- Node.js 22.12 or newer
 - npm
 - PowerShell examples below; equivalent commands work in other shells
 

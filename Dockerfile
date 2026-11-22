@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:24-bookworm-slim AS client-build
+FROM node:22-bookworm-slim AS client-build
 WORKDIR /app/client
 
 COPY client/package.json client/package-lock.json ./
@@ -20,13 +20,13 @@ ENV VITE_AUTH_PROVIDER=$VITE_AUTH_PROVIDER \
     VITE_ENTRA_API_SCOPE=$VITE_ENTRA_API_SCOPE
 RUN npm run build
 
-FROM node:24-bookworm-slim AS server-dependencies
+FROM node:22-bookworm-slim AS server-dependencies
 WORKDIR /app/server
 
 COPY server/package.json server/package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 
-FROM node:24-bookworm-slim AS runtime
+FROM node:22-bookworm-slim AS runtime
 ENV NODE_ENV=production \
     HOST=0.0.0.0 \
     SERVE_CLIENT=true \
