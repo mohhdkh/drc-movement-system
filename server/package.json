@@ -1,0 +1,51 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "start:production": "node src/tools/productionStart.js",
+    "production:check": "node src/tools/productionConfigCheck.js",
+    "db:migrate": "node src/db/migrate.js",
+    "db:postgres:migrate": "node src/tools/postgresMigrate.js",
+    "db:postgres:status": "node src/tools/postgresStatus.js",
+    "db:postgres:validate": "node src/tools/postgresMigrationValidate.js",
+    "db:postgres:import:dry-run": "node src/tools/sqliteToPostgres.js --dry-run",
+    "db:postgres:import": "node src/tools/sqliteToPostgres.js",
+    "db:postgres:verify": "node src/tools/postgresVerify.js",
+    "sharepoint:verify": "node src/tools/sharePointVerify.js",
+    "sharepoint:provision": "node src/tools/sharePointProvision.js",
+    "sharepoint:sync:dry-run": "node src/tools/sharePointSync.js --dry-run",
+    "sharepoint:sync": "node src/tools/sharePointSync.js",
+    "test": "node --test --test-concurrency=1"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "src"
+    ],
+    "ignore": [
+      "*.log"
+    ]
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "Backend API for the DRC Employee Movement Management System",
+  "dependencies": {
+    "@xmldom/xmldom": "^0.9.12",
+    "axios": "^1.20.0",
+    "better-sqlite3": "^13.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.7.0",
+    "helmet": "^8.3.0",
+    "jose": "^6.2.12",
+    "jszip": "^3.10.1",
+    "pg": "^8.23.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
