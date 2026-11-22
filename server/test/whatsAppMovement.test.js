@@ -29,8 +29,8 @@ function movement(overrides = {}) {
 
 const resources = {
   users: [
-    { id: 'emp-one', name: 'Employee One', phone: '+970590001111' },
-    { id: 'emp-leader', name: 'Vehicle Leader', phone: '+970590002222' },
+    { id: 'emp-one', name: 'Employee One', phone: '+000000000001' },
+    { id: 'emp-leader', name: 'Vehicle Leader', phone: '+000000000002' },
   ],
   locations: [
     { name: 'Office', latitude: 31.5017, longitude: 34.4668 },
@@ -39,7 +39,7 @@ const resources = {
     { name: 'Site 3', latitude: 31.53, longitude: 34.49 },
   ],
   vehicles: [{ id: 'vehicle-1', code: 'DRC001' }],
-  drivers: [{ id: 'driver-1', name: 'Driver Name', phone: '+970590003333' }],
+  drivers: [{ id: 'driver-1', name: 'Driver Name', phone: '+000000000003' }],
   gpsDevices: [{ id: 'gps-1', code: 'GPS-01' }],
 }
 
@@ -57,13 +57,14 @@ test('maps and formats any number of persisted stops in chronological order', ()
 
   assert.equal(mapped.segments.length, 4)
   assert.equal(mapped.passengers.length, 2)
+  assert.equal(mapped.paxCount, 3)
   assert.deepEqual(mapped.segments.map((segment) => segment.code), ['M01', 'M02', 'M03', 'M04'])
   assert.ok(text.indexOf('*M01*') < text.indexOf('*M04*'))
   assert.match(text, /المرجع: MOV-WHATSAPP01/)
   assert.match(text, /المركبة: DRC001/)
-  assert.match(text, /السائق: Driver Name - \+970590003333/)
-  assert.match(text, /Employee One - \+970590001111/)
-  assert.match(text, /قائد المركبة: Vehicle Leader - \+970590002222/)
+  assert.match(text, /السائق: Driver Name - \+000000000003/)
+  assert.match(text, /Employee One - \+000000000001/)
+  assert.match(text, /قائد المركبة: Vehicle Leader - \+000000000002/)
   assert.match(text, /إحداثيات الانطلاق: 31\.5017, 34\.4668/)
   assert.match(text, /وقت الوصول: 13:00/)
   assert.match(text, /وقت المغادرة: 13:30/)
@@ -87,7 +88,7 @@ test('omits missing optional phones, coordinates, and stop times without inventi
   assert.match(text, /جهاز GPS: بدون جهاز GPS/)
   assert.doesNotMatch(text, /إحداثيات/)
   assert.doesNotMatch(text, /وقت الوصول|وقت المغادرة/)
-  assert.doesNotMatch(text, /\+970/)
+  assert.doesNotMatch(text, /\+000/)
 })
 
 test('filters out movements that are not FINAL_APPROVED', () => {

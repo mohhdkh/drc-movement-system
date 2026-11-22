@@ -39,7 +39,7 @@ function formatWhatsAppMovement(movement) {
   if (movement.driver) lines.push(`السائق: ${personText(movement.driver)}`)
   lines.push(`جهاز GPS: ${movement.gps.type === 'NO_GPS' ? 'بدون جهاز GPS' : movement.gps.label || 'غير محدد'}`)
   lines.push(`قائد المركبة: ${personText(movement.vehicleLeader)}`)
-  lines.push(`عدد الركاب (Pax): ${movement.passengers.length}`)
+  lines.push(`عدد الأشخاص (PAX، شامل السائق): ${movement.paxCount}`)
   if (movement.passengers.length) {
     lines.push('', '*الركاب*')
     movement.passengers.forEach((passenger, index) => {

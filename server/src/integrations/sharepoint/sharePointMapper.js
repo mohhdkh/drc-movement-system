@@ -90,7 +90,7 @@ function mapMasterData(snapshot) {
     })),
     vehicles: snapshot.vehicles.map((item) => ({
       ...title(item.id), VehicleId: item.id, VehicleCode: item.code, PlateNumber: item.plateNumber,
-      Model: item.model, Active: item.active, CreatedAt: item.createdAt, UpdatedAt: item.updatedAt,
+      Model: item.model, Capacity: item.capacity, Active: item.active, CreatedAt: item.createdAt, UpdatedAt: item.updatedAt,
     })),
     drivers: snapshot.drivers.map((item) => ({
       ...title(item.id), DriverId: item.id, DriverName: item.name, Phone: item.phone,

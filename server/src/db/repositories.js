@@ -33,6 +33,7 @@ const resourceDefinitions = {
       { property: 'code', column: 'code' },
       { property: 'plateNumber', column: 'plate_number' },
       { property: 'model', column: 'model' },
+      { property: 'capacity', column: 'capacity' },
     ],
   },
 }

@@ -20,7 +20,7 @@ const resourceDefinitions = {
   },
   vehicles: {
     table: 'vehicles',
-    fields: [['code', 'code'], ['plateNumber', 'plate_number'], ['model', 'model']],
+    fields: [['code', 'code'], ['plateNumber', 'plate_number'], ['model', 'model'], ['capacity', 'capacity']],
   },
 }
 
@@ -464,12 +464,16 @@ class PostgresOperationalProvider {
     }
 
     const base = [movement.id, movement.movementDate, movement.etd, movement.eta]
-    if (movement.status === 'SAFETY_APPROVED' && movement.gpsAssignment?.type === 'DEVICE') {
+    if (
+      ['SAFETY_APPROVED', 'VEHICLE_ASSIGNED', 'PENDING_AREA_MANAGER', 'FINAL_APPROVED'].includes(movement.status) &&
+      movement.gpsAssignment?.type === 'DEVICE'
+    ) {
       const conflict = await client.query(`
         SELECT m.id, m.etd, m.eta FROM movements m
         JOIN safety_reviews s ON s.movement_id = m.id
         WHERE m.id <> $1 AND m.movement_date = $2 AND m.etd < $4 AND m.eta > $3
-          AND m.status = 'SAFETY_APPROVED' AND s.gps_type = 'DEVICE' AND s.gps_device_id = $5
+          AND m.status IN ('SAFETY_APPROVED', 'VEHICLE_ASSIGNED', 'PENDING_AREA_MANAGER', 'FINAL_APPROVED')
+          AND s.gps_type = 'DEVICE' AND s.gps_device_id = $5
         LIMIT 1
       `, [...base, movement.gpsAssignment.gpsDeviceId])
       if (conflict.rowCount) throw new AppError('The selected GPS device is not available for this movement time.', 409)
@@ -513,7 +517,9 @@ class PostgresOperationalProvider {
       previousStatus = existingStatus
       const expectedStatus = this.expectedPreviousStatus(movement.status)
       const isAllowedSameStatusUpdate = transition.allowSameStatus === true && existingStatus === movement.status
-      if (!isAllowedSameStatusUpdate && expectedStatus !== undefined && existingStatus !== expectedStatus) {
+      const isAllowedExplicitTransition = Array.isArray(transition.allowedFromStatuses) &&
+        transition.allowedFromStatuses.includes(existingStatus)
+      if (!isAllowedSameStatusUpdate && !isAllowedExplicitTransition && expectedStatus !== undefined && existingStatus !== expectedStatus) {
         throw new AppError(
           existingStatus === null ? 'A duplicate movement write was rejected.' : 'This workflow decision has already been completed.',
           409,

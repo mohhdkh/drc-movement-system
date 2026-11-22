@@ -262,6 +262,7 @@ test('PostgreSQL Safety conflict check uses advisory lock and exact overlap pred
   assert.ok(pool.queries.some((query) => query.text.includes('pg_advisory_xact_lock')))
   const conflict = pool.queries.find((query) => query.text.includes('JOIN safety_reviews'))
   assert.match(conflict.text, /m\.etd < \$4 AND m\.eta > \$3/)
+  assert.match(conflict.text, /'SAFETY_APPROVED', 'VEHICLE_ASSIGNED', 'PENDING_AREA_MANAGER', 'FINAL_APPROVED'/)
   assert.equal(pool.queries.at(-1).text, 'ROLLBACK')
 })
 
@@ -314,7 +315,7 @@ test('PostgreSQL persists an Admin user mutation and audit in one transaction', 
     createdAt: '2026-09-05T12:00:00.000Z', updatedAt: '2026-09-05T12:00:00.000Z',
   }
   await provider.replaceUsers([user], {
-    timestamp: '2026-09-05T12:00:00.000Z', actorId: 'emp-002', actorName: 'Huda Almahdi',
+    timestamp: '2026-09-05T12:00:00.000Z', actorId: 'emp-002', actorName: 'Demo Safety Officer',
     action: 'USER_CREATED', entityType: 'USER', entityId: user.id, before: null, after: user,
   })
   const auditIndex = pool.queries.findIndex((query) => query.text.includes('INSERT INTO audit_logs'))

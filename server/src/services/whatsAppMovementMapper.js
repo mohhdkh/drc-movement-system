@@ -87,6 +87,8 @@ function mapWhatsAppMovement({ movements, users, locations, vehicles, drivers, g
   const driverId = movement.supplyChainAssignment?.driverId
   const vehicleId = movement.supplyChainAssignment?.vehicleId
   const gpsDeviceId = movement.gpsAssignment?.gpsDeviceId
+  const driver = driverId ? displayPerson(driverIndex.get(driverId), driverId) : null
+  const maxSegmentPassengers = Math.max(0, ...segments.map((segment) => segment.passengers.length))
 
   return {
     movementId: movement.id,
@@ -94,7 +96,8 @@ function mapWhatsAppMovement({ movements, users, locations, vehicles, drivers, g
     etd: movement.etd,
     purpose: movement.purpose,
     vehicle: vehicleIndex.get(vehicleId)?.code || vehicleId || null,
-    driver: driverId ? displayPerson(driverIndex.get(driverId), driverId) : null,
+    driver,
+    paxCount: maxSegmentPassengers + (driver ? 1 : 0),
     passengers: passengerIds,
     vehicleLeader: displayPerson(userIndex.get(movement.vehicleLeaderId), movement.vehicleLeaderId),
     gps: movement.gpsAssignment?.type === 'NO_GPS'

@@ -1,4 +1,9 @@
-const GPS_RESERVED_STATUSES = new Set(['SAFETY_APPROVED'])
+const GPS_RESERVED_STATUSES = new Set([
+  'SAFETY_APPROVED',
+  'VEHICLE_ASSIGNED',
+  'PENDING_AREA_MANAGER',
+  'FINAL_APPROVED',
+])
 
 function findGpsConflict(candidate, movements) {
   return movements.find((movement) => {

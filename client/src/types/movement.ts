@@ -125,6 +125,7 @@ export interface Vehicle {
   code: string
   plateNumber: string
   model: string
+  capacity: number
   description?: string
   active: boolean
   createdAt: string

@@ -63,10 +63,10 @@ export function MovementDetailsPage() {
     return <ErrorState title="Movement request could not be loaded" message={error} />
   }
 
-  const canEdit = movement.status === 'PENDING_SAFETY' &&
-    !movement.safetyReview.decision &&
-    !movement.safetyReview.reviewedAt &&
-    !isAfterLocalCutoff(movement.movementDate)
+  const canEdit = (
+    (movement.status === 'PENDING_SAFETY' && !movement.safetyReview.decision && !movement.safetyReview.reviewedAt) ||
+    (movement.status === 'RETURNED_FOR_MODIFICATION' && movement.safetyReview.decision === 'RETURNED')
+  ) && !isAfterLocalCutoff(movement.movementDate)
 
   return (
     <div className="employee-page details-page">

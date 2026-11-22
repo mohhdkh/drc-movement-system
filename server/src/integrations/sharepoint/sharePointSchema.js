@@ -52,7 +52,7 @@ const SHAREPOINT_LISTS = {
   vehicles: {
     displayName: 'Vehicles', keyField: 'VehicleId', columns: [
       text('VehicleId', { required: true, indexed: true }), text('VehicleCode', { required: true }),
-      text('PlateNumber', { required: true }), text('Model', { required: true }), boolean('Active'),
+      text('PlateNumber', { required: true }), text('Model', { required: true }), number('Capacity'), boolean('Active'),
       dateTime('CreatedAt', true), dateTime('UpdatedAt', true),
     ],
   },

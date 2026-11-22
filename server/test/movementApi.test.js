@@ -63,8 +63,8 @@ test('GET /employees returns the mock employee directory', async () => {
   const payload = await response.json()
 
   assert.equal(response.status, 200)
-  assert.equal(payload.data.length, 62)
-  assert.equal(payload.data[0].displayName, 'Abd Al-Hai Abd Al-Jawad')
+  assert.equal(payload.data.length, 8)
+  assert.ok(payload.data.every((employee) => employee.displayName.startsWith('Demo ')))
 })
 
 test('GET /locations returns active master locations alphabetically', async () => {

@@ -27,3 +27,6 @@ through the documented deployment process after CI and review.
 The project includes Microsoft Entra authentication, local authoritative roles, strict CORS, security headers,
 rate limiting, bounded payloads, verified PostgreSQL TLS, structured log redaction, readiness checks, and explicit
 database migrations. Changes that weaken these controls require explicit security review.
+
+Source control must contain synthetic demo records only. Personnel directories, phone numbers, operational Excel
+exports, and official workbook templates belong in approved private systems and are blocked by `.gitignore`.

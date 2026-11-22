@@ -1,4 +1,6 @@
 const assert = require('node:assert/strict')
+const fs = require('node:fs')
+const os = require('node:os')
 const path = require('node:path')
 const test = require('node:test')
 const JSZip = require('jszip')
@@ -11,12 +13,21 @@ const {
   renderMovementPlanWorkbook,
   sha256,
 } = require('../src/services/movementPlanWorkbook')
+const { createMovementWorkbookFixture } = require('../test-support/movementWorkbookFixture')
 
 const XML_NS = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main'
 const REL_NS = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships'
 const PACKAGE_REL_NS = 'http://schemas.openxmlformats.org/package/2006/relationships'
-const templatePath = path.resolve(__dirname, '../../doc/Movement_Tracker_LIVE (1).xlsm')
-const inspectedVbaHash = 'ac63a7161979ce5f55d220034a3c0e4f634319709f91cc951f20e6c9f04fde99'
+let fixtureDirectory
+let templatePath
+
+test.before(async () => {
+  fixtureDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'movement-workbook-'))
+  templatePath = path.join(fixtureDirectory, 'synthetic-template.xlsm')
+  await createMovementWorkbookFixture(templatePath, { sheets: OFFICIAL_SHEETS, headers: OFFICIAL_HEADERS })
+})
+
+test.after(() => fs.rmSync(fixtureDirectory, { recursive: true, force: true }))
 
 function movement(overrides = {}) {
   return {
@@ -210,7 +221,7 @@ test('rejects exports that exceed the official P01-P50 plan limit', () => {
 
 test('renders the official XLSM and preserves every package part except Movement Tracker', async () => {
   const rows = mapRows([movement()])
-  const source = await JSZip.loadAsync(require('node:fs').readFileSync(templatePath))
+  const source = await JSZip.loadAsync(fs.readFileSync(templatePath))
   const workbook = await renderMovementPlanWorkbook({ templatePath, rows })
   const output = await JSZip.loadAsync(workbook)
   const targetPart = await worksheetPart(source, 'Movement Tracker')
@@ -220,8 +231,8 @@ test('renders the official XLSM and preserves every package part except Movement
     await output.file('[Content_Types].xml').async('string'),
     /application\/vnd\.ms-excel\.sheet\.macroEnabled\.main\+xml/,
   )
-  assert.equal(sha256(await source.file('xl/vbaProject.bin').async('nodebuffer')), inspectedVbaHash)
-  assert.equal(sha256(await output.file('xl/vbaProject.bin').async('nodebuffer')), inspectedVbaHash)
+  const sourceVbaHash = sha256(await source.file('xl/vbaProject.bin').async('nodebuffer'))
+  assert.equal(sha256(await output.file('xl/vbaProject.bin').async('nodebuffer')), sourceVbaHash)
   assert.deepEqual(Object.keys(output.files).sort(), Object.keys(source.files).sort())
 
   for (const name of Object.keys(source.files)) {
@@ -242,7 +253,7 @@ test('renders the official XLSM and preserves every package part except Movement
 
 test('populates Movement Tracker columns and preserves formulas outside export cells', async () => {
   const rows = mapRows([movement()])
-  const source = await JSZip.loadAsync(require('node:fs').readFileSync(templatePath))
+  const source = await JSZip.loadAsync(fs.readFileSync(templatePath))
   const workbook = await renderMovementPlanWorkbook({ templatePath, rows })
   const output = await JSZip.loadAsync(workbook)
   const targetPart = await worksheetPart(source, 'Movement Tracker')

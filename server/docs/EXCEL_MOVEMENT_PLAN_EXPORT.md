@@ -15,19 +15,16 @@ when it is `FINAL_APPROVED`. Backend `SAFETY` authorization is authoritative. Sh
 
 ## Official Template
 
-The default template is:
+The official workbook is confidential operational material and must never be committed to Git. Store it in an
+approved private deployment secret or mounted volume and set `MOVEMENT_PLAN_TEMPLATE_PATH` to its absolute path.
+The export endpoint returns `503 MOVEMENT_PLAN_TEMPLATE_UNAVAILABLE` when no private template is configured.
 
-```text
-doc/Movement_Tracker_LIVE (1).xlsm
-```
-
-`MOVEMENT_PLAN_TEMPLATE_PATH` may override it with a trusted copy of the same official workbook. The renderer
+The renderer
 resolves `Movement Tracker` by workbook sheet name and relationship. It replaces only export-dataset cells in
 rows 4 through 5999 and leaves every other package part unchanged.
 
 The output remains macro-enabled. Generation fails unless `xl/vbaProject.bin` is present, and its SHA-256 is
-verified after rendering. Tests also verify that every package part except the target worksheet has identical
-uncompressed bytes before and after generation.
+verified after rendering. Automated tests use a generated synthetic workbook containing no operational data.
 
 ## Mapping
 

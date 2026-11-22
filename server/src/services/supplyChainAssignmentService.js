@@ -74,6 +74,17 @@ async function submitSupplyChainAssignment(id, input, { actor, now = new Date() 
     })
   }
 
+  if (vehicle) {
+    const passengerCount = Math.max(0, ...movement.segments.map((segment) => segment.passengerIds.length))
+    const requiredOccupancy = passengerCount + 1
+    if (requiredOccupancy > vehicle.capacity) {
+      errors.push({
+        field: 'vehicleId',
+        message: `This movement requires ${requiredOccupancy} seats including the driver; ${vehicle.code} has ${vehicle.capacity}.`,
+      })
+    }
+  }
+
   if (errors.length > 0) {
     throw new ValidationError(errors, 'Supply Chain assignment validation failed')
   }

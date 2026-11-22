@@ -33,6 +33,15 @@ function validateMovementId(value) {
 
 async function createMovementPlanExport({ movementId, templatePath } = {}) {
   const selectedMovementId = validateMovementId(movementId)
+  const resolvedTemplatePath = templatePath || getTemplatePath()
+  if (!fs.existsSync(resolvedTemplatePath)) {
+    throw new AppError(
+      'The private Movement Tracker template is not configured.',
+      503,
+      undefined,
+      'MOVEMENT_PLAN_TEMPLATE_UNAVAILABLE',
+    )
+  }
   const rows = mapMovementPlanRows({
     movements: listMovements(),
     users,
@@ -43,7 +52,7 @@ async function createMovementPlanExport({ movementId, templatePath } = {}) {
     movementId: selectedMovementId,
   })
   const workbook = await renderMovementPlanWorkbook({
-    templatePath: templatePath || getTemplatePath(),
+    templatePath: resolvedTemplatePath,
     rows,
   })
   const suffix = selectedMovementId || 'FINAL_APPROVED'

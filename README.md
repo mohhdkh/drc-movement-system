@@ -88,11 +88,12 @@ flowchart TB
 
 ## Quality and security
 
-- 162 automated tests across client and server
+- 165 automated tests across client and server
 - TypeScript build and Oxlint checks on every pull request
 - Strict CORS allowlist, Helmet headers, JSON/content limits, and production rate limiting
 - Cryptographic Entra access-token verification with bounded metadata retries
 - PostgreSQL transactions, locking, conflict detection, and explicit schema migrations
+- Returned-request resubmission, full-lifecycle GPS reservations, and vehicle-capacity enforcement
 - Redacted structured logging, request correlation IDs, and stable error envelopes
 - Liveness, readiness, graceful shutdown, and pre-deploy migration controls
 - Formula-injection protection in exported workbooks
@@ -105,8 +106,7 @@ flowchart TB
 ├── .github/                 # CI, ownership, issue, and pull-request templates
 ├── client/                  # React + TypeScript application
 ├── server/                  # Express API, database, tests, and operations docs
-├── doc/                     # Official movement-plan workbook templates
-├── artifacts/               # Verified delivery artifacts
+├── doc/                     # Instructions for mounting private workbooks
 ├── Dockerfile               # Production multi-stage image
 ├── render.yaml              # Free review-environment blueprint
 ├── render.production.yaml   # Paid production blueprint
@@ -144,7 +144,8 @@ Open `http://localhost:5173`. The local API defaults to `http://localhost:5000/a
 
 > [!IMPORTANT]
 > Never commit a populated `.env` file. Browser variables prefixed with `VITE_` are public and must never
-> contain passwords, connection strings, or client secrets.
+> contain passwords, connection strings, or client secrets. Never commit personnel directories, phone numbers,
+> operational exports, or official workbooks; seed records must remain explicitly synthetic.
 
 ## Verification
 

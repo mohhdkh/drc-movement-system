@@ -2,6 +2,7 @@ const assert = require('node:assert/strict')
 const { after, before, beforeEach, test } = require('node:test')
 const app = require('../src/app')
 const { resetMovements } = require('../src/data/movementStore')
+const { resetVehicles } = require('../src/data/vehicles')
 
 let server
 let baseUrl
@@ -23,6 +24,7 @@ after(() => {
 
 beforeEach(() => {
   resetMovements()
+  resetVehicles()
 })
 
 function movementRequest(overrides = {}) {
@@ -123,6 +125,21 @@ test('assigns an active vehicle and driver to a Safety-approved movement', async
   assert.equal(assigned.supplyChainAssignment.assignedBy, 'emp-006')
   assert.equal(assigned.supplyChainAssignment.vehicleId, 'veh-001')
   assert.equal(assigned.supplyChainAssignment.driverId, 'drv-001')
+})
+
+test('rejects a vehicle whose total capacity cannot include passengers and driver', async () => {
+  const passengers = ['emp-001', 'emp-002', 'emp-003', 'emp-004', 'emp-005']
+  const movement = await createSafetyApprovedMovement({
+    segments: [
+      { arrivalTime: '09:45', departureTime: '10:15', passengerIds: passengers },
+      { arrivalTime: '10:45', departureTime: '11:00', passengerIds: ['emp-001'] },
+    ],
+  })
+  const response = await assignMovement(movement.id, { vehicleId: 'veh-002' })
+  const payload = await response.json()
+
+  assert.equal(response.status, 400)
+  assert.ok(payload.errors.some((error) => error.field === 'vehicleId' && error.message.includes('including the driver')))
 })
 
 test('requires a vehicle', async () => {

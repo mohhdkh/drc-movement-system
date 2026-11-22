@@ -166,7 +166,7 @@ test('links exactly one active email match and creates a server-owned audit entr
   const identity = {
     objectId: OBJECT_ID,
     tenantId: TENANT_ID,
-    principalName: 'dema.almadhoun@drc.example',
+    principalName: 'passenger.two@example.invalid',
   }
   const linked = await resolveEntraUser(identity, { now: new Date('2030-01-01T00:00:00Z') })
   const audit = listAuditEntries().find((entry) => entry.action === 'ENTRA_ACCOUNT_LINKED')

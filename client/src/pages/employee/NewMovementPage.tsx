@@ -69,12 +69,11 @@ export function NewMovementPage() {
           setEmployees(employeeData)
           setLocations(locationData)
           if (movement) {
-            if (
-              movement.status !== 'PENDING_SAFETY' ||
-              movement.safetyReview.decision ||
-              movement.safetyReview.reviewedAt ||
-              isAfterLocalCutoff(movement.movementDate)
-            ) {
+            const isPendingFirstReview = movement.status === 'PENDING_SAFETY' &&
+              !movement.safetyReview.decision && !movement.safetyReview.reviewedAt
+            const isReturned = movement.status === 'RETURNED_FOR_MODIFICATION' &&
+              movement.safetyReview.decision === 'RETURNED'
+            if ((!isPendingFirstReview && !isReturned) || isAfterLocalCutoff(movement.movementDate)) {
               setLoadError('This movement request can no longer be edited.')
               return
             }
@@ -334,7 +333,7 @@ export function NewMovementPage() {
         <div className="form-actions">
           <Link className="button button-secondary" to="/employee">Cancel</Link>
           <button className="button button-primary" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Saving...' : isEditing ? 'Save Request Changes' : 'Submit Movement Request'}
+            {isSubmitting ? 'Saving...' : isEditing ? 'Save and Resubmit' : 'Submit Movement Request'}
           </button>
         </div>
       </form>

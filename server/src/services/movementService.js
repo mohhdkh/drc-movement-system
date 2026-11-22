@@ -191,11 +191,12 @@ async function updateEmployeeMovement(id, input, options = {}) {
   if (existing.requesterId !== actor.id) {
     throw new AppError('You can only edit your own movement requests.', 403)
   }
-  if (
-    existing.status !== 'PENDING_SAFETY' ||
-    existing.safetyReview.decision ||
-    existing.safetyReview.reviewedAt
-  ) {
+  const isPendingFirstReview = existing.status === 'PENDING_SAFETY' &&
+    !existing.safetyReview.decision &&
+    !existing.safetyReview.reviewedAt
+  const isReturnedForModification = existing.status === 'RETURNED_FOR_MODIFICATION' &&
+    existing.safetyReview.decision === 'RETURNED'
+  if (!isPendingFirstReview && !isReturnedForModification) {
     throw new AppError('This movement request can no longer be edited.', 409)
   }
 
@@ -231,6 +232,16 @@ async function updateEmployeeMovement(id, input, options = {}) {
       segmentInputs: normalized.segments,
     }),
     status: 'PENDING_SAFETY',
+    safetyReview: {
+      reviewedBy: null,
+      reviewedAt: null,
+      decision: null,
+      comment: null,
+    },
+    gpsAssignment: {
+      type: null,
+      gpsDeviceId: null,
+    },
     updatedAt: timestamp,
   }
   const audit = {
@@ -246,8 +257,11 @@ async function updateEmployeeMovement(id, input, options = {}) {
 
   return await replaceMovement(updated, {
     actorId: actor.id,
-    context: 'Movement request edited by Employee before cutoff.',
-    allowSameStatus: true,
+    context: isReturnedForModification
+      ? 'Movement request edited and resubmitted after Safety return.'
+      : 'Movement request edited by Employee before cutoff.',
+    allowSameStatus: isPendingFirstReview,
+    allowedFromStatuses: isReturnedForModification ? ['RETURNED_FOR_MODIFICATION'] : [],
     audit,
   })
 }

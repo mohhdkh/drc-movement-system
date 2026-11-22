@@ -34,14 +34,14 @@ export function ApplicationLayout() {
   const isAreaManagerWorkspace = pathname.startsWith('/area-manager')
   const isAdminWorkspace = pathname.startsWith('/admin')
   const developmentUser = isAdminWorkspace
-    ? { initials: 'HA', name: 'Huda Almahdi' }
+    ? { initials: 'DS', name: 'Demo Safety Officer' }
     : isAreaManagerWorkspace
-    ? { initials: 'AM', name: 'Abed Al Rahman Mousa' }
+    ? { initials: 'DA', name: 'Demo Area Manager' }
     : isSupplyChainWorkspace
-      ? { initials: 'HJ', name: 'Hani Jouda' }
+      ? { initials: 'DS', name: 'Demo Supply Chain Officer' }
       : isSafetyWorkspace
-        ? { initials: 'HA', name: 'Huda Almahdi' }
-        : { initials: 'AT', name: 'Ahmed Thabet' }
+        ? { initials: 'DS', name: 'Demo Safety Officer' }
+        : { initials: 'DE', name: 'Demo Employee' }
   const currentUser = authentication.user
     ? {
         initials: authentication.user.name.split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase(),

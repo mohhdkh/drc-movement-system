@@ -1,13 +1,25 @@
 const assert = require('node:assert/strict')
+const fs = require('node:fs')
+const os = require('node:os')
+const path = require('node:path')
 const { after, before, beforeEach, test } = require('node:test')
 const app = require('../src/app')
 const { resetMovements } = require('../src/data/movementStore')
+const { OFFICIAL_HEADERS, OFFICIAL_SHEETS } = require('../src/services/movementPlanWorkbook')
+const { createMovementWorkbookFixture } = require('../test-support/movementWorkbookFixture')
 
 let server
 let baseUrl
+let fixtureDirectory
 
-before(() => {
-  return new Promise((resolve) => {
+before(async () => {
+  fixtureDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'movement-workbook-api-'))
+  process.env.MOVEMENT_PLAN_TEMPLATE_PATH = path.join(fixtureDirectory, 'synthetic-template.xlsm')
+  await createMovementWorkbookFixture(process.env.MOVEMENT_PLAN_TEMPLATE_PATH, {
+    sheets: OFFICIAL_SHEETS,
+    headers: OFFICIAL_HEADERS,
+  })
+  await new Promise((resolve) => {
     server = app.listen(0, '127.0.0.1', () => {
       baseUrl = `http://127.0.0.1:${server.address().port}/api`
       resolve()
@@ -15,10 +27,12 @@ before(() => {
   })
 })
 
-after(() => {
-  return new Promise((resolve, reject) => {
+after(async () => {
+  await new Promise((resolve, reject) => {
     server.close((error) => (error ? reject(error) : resolve()))
   })
+  delete process.env.MOVEMENT_PLAN_TEMPLATE_PATH
+  fs.rmSync(fixtureDirectory, { recursive: true, force: true })
 })
 
 beforeEach(() => {
@@ -324,7 +338,7 @@ test('Safety previews WhatsApp text for a selected final-approved movement only'
   assert.match(result.text, new RegExp(`المرجع: ${movement.id}`))
   assert.match(result.text, /\*M01\*[\s\S]*\*M02\*/)
   assert.match(result.text, /وقت الوصول: 09:45/)
-  assert.match(result.text, /السائق: Bassam Raed Bassam Tafesh - \+972593496000/)
+  assert.match(result.text, /السائق: Demo Driver One/)
 
   const forbidden = await apiRequest('/safety/movements/whatsapp-preview', {
     method: 'POST',

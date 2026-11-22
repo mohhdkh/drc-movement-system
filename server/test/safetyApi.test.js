@@ -208,6 +208,42 @@ test('records a valid return for modification', async () => {
   assert.equal(reviewed.safetyReview.decision, 'RETURNED')
 })
 
+test('allows the requester to edit and resubmit a movement returned by Safety', async () => {
+  const movement = await createMovement()
+  const returnedResponse = await reviewMovement(movement.id, {
+    action: 'RETURN',
+    reviewedBy: 'emp-002',
+    comment: 'Correct the route details.',
+  })
+  const returned = (await returnedResponse.json()).data
+
+  const response = await apiRequest(`/movements/${movement.id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      movementDate: returned.movementDate,
+      purpose: 'Corrected and resubmitted movement',
+      startLocation: returned.startLocation,
+      routePoints: returned.routePoints,
+      vehicleLeaderId: returned.vehicleLeaderId,
+      notes: returned.notes,
+      segments: returned.segments.map((segment) => ({
+        arrivalTime: segment.arrivalTime,
+        departureTime: segment.departureTime,
+        passengerIds: segment.passengerIds,
+      })),
+    }),
+  })
+  const resubmitted = (await response.json()).data
+
+  assert.equal(response.status, 200)
+  assert.equal(resubmitted.status, 'PENDING_SAFETY')
+  assert.equal(resubmitted.purpose, 'Corrected and resubmitted movement')
+  assert.deepEqual(resubmitted.safetyReview, {
+    reviewedBy: null, reviewedAt: null, decision: null, comment: null,
+  })
+  assert.deepEqual(resubmitted.gpsAssignment, { type: null, gpsDeviceId: null })
+})
+
 test('blocks a second Safety decision on an already reviewed movement', async () => {
   const movement = await createMovement()
   const firstResponse = await reviewMovement(
@@ -262,6 +298,20 @@ test('blocks overlapping reservations for the same GPS device', async () => {
   assert.ok(
     payload.errors.some((error) => error.field === 'gpsAssignment.gpsDeviceId'),
   )
+})
+
+test('keeps a GPS device reserved after vehicle assignment', async () => {
+  const first = await createMovement({ etd: '09:00', eta: '11:00' })
+  const second = await createMovement({ purpose: 'Overlapping movement', etd: '10:00', eta: '12:00' })
+  assert.equal((await reviewMovement(first.id, approval({ type: 'DEVICE', gpsDeviceId: 'gps-001' }))).status, 200)
+  const assignment = await apiRequest(`/supply-chain/movements/${first.id}/assignment`, {
+    method: 'PATCH',
+    body: JSON.stringify({ vehicleId: 'veh-001', driverId: 'drv-001' }),
+  })
+  assert.equal(assignment.status, 200)
+
+  const conflict = await reviewMovement(second.id, approval({ type: 'DEVICE', gpsDeviceId: 'gps-001' }))
+  assert.equal(conflict.status, 409)
 })
 
 test('allows touching, non-overlapping GPS reservations', async () => {

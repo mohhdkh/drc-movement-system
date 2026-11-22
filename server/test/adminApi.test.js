@@ -68,7 +68,7 @@ function validUser(overrides = {}) {
     id: 'emp-100',
     name: 'New Admin Test User',
     email: 'new.user@drc.example',
-    phone: '+970599000100',
+    phone: '+000000000100',
     departmentId: 'dep-programs',
     roles: ['EMPLOYEE', 'SAFETY'],
     active: true,
@@ -163,6 +163,7 @@ test('creates vehicles and rejects duplicate codes or plate numbers', async () =
     code: 'DRC100',
     plateNumber: 'DRC-100',
     model: 'Toyota Prado',
+    capacity: 8,
   }
   assert.equal((await create('/admin/vehicles', vehicle)).status, 201)
   assert.equal((await create('/admin/vehicles', { ...vehicle, id: 'veh-101', plateNumber: 'DRC-101' })).status, 400)
@@ -171,7 +172,7 @@ test('creates vehicles and rejects duplicate codes or plate numbers', async () =
 
 test('vehicle activation changes immediately affect Supply Chain options', async () => {
   assert.equal((await create('/admin/vehicles', {
-    id: 'veh-100', code: 'DRC100', plateNumber: 'DRC-100', model: 'Toyota Prado',
+    id: 'veh-100', code: 'DRC100', plateNumber: 'DRC-100', model: 'Toyota Prado', capacity: 8,
   })).status, 201)
   let options = (await (await apiRequest('/vehicles')).json()).data
   assert.ok(options.some((vehicle) => vehicle.id === 'veh-100'))
@@ -266,6 +267,7 @@ test('records server-owned Admin audit entries with update before and after snap
     code: 'DRC100',
     plateNumber: 'DRC-100',
     model: 'Initial Model',
+    capacity: 8,
     actorId: 'emp-999',
   })).status, 201)
   assert.equal((await update('/admin/vehicles/veh-100', {
@@ -278,7 +280,7 @@ test('records server-owned Admin audit entries with update before and after snap
   assert.equal(response.status, 200)
   assert.equal(entries.length, 1)
   assert.equal(entries[0].actorId, 'emp-002')
-  assert.equal(entries[0].actorName, 'Huda Almahdi')
+  assert.equal(entries[0].actorName, 'Demo Safety Officer')
   assert.equal(entries[0].before.model, 'Initial Model')
   assert.equal(entries[0].after.model, 'Updated Model')
 })
@@ -289,7 +291,7 @@ test('returns active-resource counts for the Admin dashboard', async () => {
 
   assert.equal(response.status, 200)
   assert.deepEqual(summary, {
-    activeUsers: 62,
+    activeUsers: 8,
     vehicles: 3,
     drivers: 3,
     gpsDevices: 2,

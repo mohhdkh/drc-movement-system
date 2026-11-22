@@ -13,8 +13,8 @@ const resourceConfigs = {
     items: vehicles,
     entityType: 'VEHICLE',
     actionPrefix: 'VEHICLE',
-    fields: ['code', 'plateNumber', 'model'],
-    required: ['code', 'plateNumber', 'model'],
+    fields: ['code', 'plateNumber', 'model', 'capacity'],
+    required: ['code', 'plateNumber', 'model', 'capacity'],
     uppercase: ['code', 'plateNumber'],
     unique: ['code', 'plateNumber'],
     persist: persistVehicles,
@@ -64,7 +64,7 @@ function getConfig(resourceName) {
 }
 
 function normalizeField(field, value, config) {
-  if (field === 'latitude' || field === 'longitude') {
+  if (field === 'latitude' || field === 'longitude' || field === 'capacity') {
     return value === null || value === '' || value === undefined ? null : value
   }
   if (value === null || value === undefined) return null
@@ -76,9 +76,12 @@ function normalizeField(field, value, config) {
 
 function validateFields(candidate, config, errors, currentId) {
   for (const field of config.required || []) {
-    if (typeof candidate[field] !== 'string' || !candidate[field]) {
+    if (candidate[field] === null || candidate[field] === undefined || candidate[field] === '') {
       errors.push({ field, message: `${field} is required.` })
     }
+  }
+  if ('capacity' in candidate && (!Number.isInteger(candidate.capacity) || candidate.capacity < 2 || candidate.capacity > 100)) {
+    errors.push({ field: 'capacity', message: 'capacity must be a whole number between 2 and 100, including the driver.' })
   }
 
   for (const field of config.unique || []) {

@@ -15,8 +15,9 @@ Configure `TRUST_PROXY_HOPS` to the exact number of trusted reverse proxies. An 
 client IP rate limiting unreliable. Set pool size across all replicas within the Neon connection budget.
 SharePoint remains disabled unless its enable flag and credentials are explicitly configured.
 
-Package the official Movement Tracker workbook with the API artifact or set `MOVEMENT_PLAN_TEMPLATE_PATH` to a
-readable, trusted `.xlsm` copy. Validate it against `EXCEL_MOVEMENT_PLAN_EXPORT.md` before release.
+Keep the official Movement Tracker workbook outside source control and container images. Mount a readable,
+trusted private `.xlsm` copy and set `MOVEMENT_PLAN_TEMPLATE_PATH` to it. Validate it against
+`EXCEL_MOVEMENT_PLAN_EXPORT.md` before release.
 
 ## Build And Release
 

@@ -19,6 +19,7 @@ export function SupplyChainAssignmentPanel({
   drivers,
   onAssigned,
 }: SupplyChainAssignmentPanelProps) {
+  const requiredOccupancy = Math.max(0, ...movement.segments.map((segment) => segment.passengerIds.length)) + 1
   const [vehicleId, setVehicleId] = useState('')
   const [driverId, setDriverId] = useState('')
   const [comment, setComment] = useState('')
@@ -78,7 +79,7 @@ export function SupplyChainAssignmentPanel({
   return (
     <section className="details-section assignment-panel" aria-labelledby="assignment-title">
       <h3 id="assignment-title">Supply Chain assignment</h3>
-      <p className="section-hint">Assign one active vehicle and one active driver.</p>
+      <p className="section-hint">Assign one active vehicle and driver. Required capacity: {requiredOccupancy} seats including the driver.</p>
 
       {requestError && <div className="form-alert" role="alert">{requestError}</div>}
 
@@ -96,8 +97,8 @@ export function SupplyChainAssignmentPanel({
           >
             <option value="">Select an active vehicle</option>
             {vehicles.map((vehicle) => (
-              <option key={vehicle.id} value={vehicle.id}>
-                {vehicle.code} - {vehicle.plateNumber} - {vehicle.description}
+              <option key={vehicle.id} value={vehicle.id} disabled={vehicle.capacity < requiredOccupancy}>
+                {vehicle.code} - {vehicle.plateNumber} - {vehicle.description} - {vehicle.capacity} seats
               </option>
             ))}
           </select>
