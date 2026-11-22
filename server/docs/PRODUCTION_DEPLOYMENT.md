@@ -45,6 +45,30 @@ npm run db:postgres:status
 
 Startup only validates migration state; it does not mutate schema. Launch with `npm run start:production`.
 
+### Container And Review Environment
+
+The root `Dockerfile` builds the Vite client and packages it with the API. The API serves the SPA and `/api`
+from one origin when `SERVE_CLIENT=true`, which is the recommended review and production topology. Supply the
+public Entra browser settings as Docker build arguments and all server settings as runtime secrets. The runtime
+image runs as a non-root user and exposes `/api/health/live` through its container health check.
+
+The root `render.yaml` is a ready-to-use managed staging blueprint. It uses a paid, always-on web service so the
+pre-deploy migration command can run before traffic is shifted. During Blueprint creation, provide every value
+marked `sync: false`. Use the final HTTPS service URL for both `CLIENT_ORIGIN` and
+`VITE_ENTRA_REDIRECT_URI`, and register that exact URL as a Single-page application redirect URI in Entra.
+
+The Entra values map as follows:
+
+- `VITE_ENTRA_CLIENT_ID` and `ENTRA_CLIENT_ID`: application/client ID.
+- `VITE_ENTRA_TENANT_ID`, `ENTRA_TENANT_ID`, and `ENTRA_ALLOWED_TENANT_ID`: directory/tenant ID.
+- `VITE_ENTRA_API_SCOPE`: the exposed delegated scope, normally `api://<client-id>/access_as_user`.
+- `ENTRA_AUDIENCE`: the API application ID URI expected in the token audience.
+- `ENTRA_ISSUER`: `https://login.microsoftonline.com/<tenant-id>/v2.0`.
+
+Keep `VITE_API_BASE_URL` unset for the single-origin container. Render supplies `PORT`; the Blueprint supplies
+the remaining non-secret production defaults. `DATABASE_URL` must point to the migrated PostgreSQL staging
+database and use certificate-verified TLS.
+
 The release order is: deploy the code artifact without routing traffic, run the explicit migration command,
 verify migration status, start or restart the application, then require readiness to pass before routing
 traffic.

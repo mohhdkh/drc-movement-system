@@ -1,0 +1,65 @@
+services:
+  - type: web
+    name: drc-movement-system
+    runtime: docker
+    plan: 0.5c-512mb
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    preDeployCommand: npm run db:postgres:migrate
+    healthCheckPath: /api/health/ready
+    autoDeployTrigger: checksPass
+    maxShutdownDelaySeconds: 30
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_PROVIDER
+        value: postgres
+      - key: DATABASE_URL
+        sync: false
+      - key: PGSSL
+        value: "true"
+      - key: PGPOOL_MAX
+        value: "5"
+      - key: CLIENT_ORIGIN
+        sync: false
+      - key: MOVEMENT_TIMEZONE
+        value: Asia/Gaza
+      - key: MOVEMENT_CUTOFF_HOUR
+        value: "12"
+      - key: MOVEMENT_PLAN_TEMPLATE_PATH
+        value: /app/doc/Movement_Tracker_LIVE (1).xlsm
+      - key: RATE_LIMIT_ENABLED
+        value: "true"
+      - key: TRUST_PROXY_HOPS
+        value: "1"
+      - key: LOG_REQUESTS
+        value: "true"
+      - key: SERVE_CLIENT
+        value: "true"
+      - key: CLIENT_DIST_PATH
+        value: /app/client/dist
+      - key: AUTH_PROVIDER
+        value: entra
+      - key: ENTRA_TENANT_ID
+        sync: false
+      - key: ENTRA_CLIENT_ID
+        sync: false
+      - key: ENTRA_AUDIENCE
+        sync: false
+      - key: ENTRA_ISSUER
+        sync: false
+      - key: ENTRA_ALLOWED_TENANT_ID
+        sync: false
+      - key: VITE_AUTH_PROVIDER
+        value: entra
+      - key: VITE_ENTRA_CLIENT_ID
+        sync: false
+      - key: VITE_ENTRA_TENANT_ID
+        sync: false
+      - key: VITE_ENTRA_REDIRECT_URI
+        sync: false
+      - key: VITE_ENTRA_API_SCOPE
+        sync: false
+      - key: MS_SHAREPOINT_ENV_ENABLED
+        value: "false"

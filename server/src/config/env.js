@@ -76,6 +76,10 @@ function buildRuntimeConfig(env = process.env, options = {}) {
     shutdownTimeoutMs: integer(env.SHUTDOWN_TIMEOUT_MS, 15000, 'SHUTDOWN_TIMEOUT_MS', { min: 1000 }),
     trustProxyHops: integer(env.TRUST_PROXY_HOPS, 0, 'TRUST_PROXY_HOPS', { max: 10 }),
     logRequests: boolean(env.LOG_REQUESTS, nodeEnv === 'production'),
+    serveClient: boolean(env.SERVE_CLIENT, false),
+    clientDistPath: path.resolve(
+      env.CLIENT_DIST_PATH || path.resolve(__dirname, '../../../client/dist'),
+    ),
   }
 }
 

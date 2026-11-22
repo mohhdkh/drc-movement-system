@@ -1,6 +1,8 @@
 const express = require('express')
 const cors = require('cors')
 const helmet = require('helmet')
+const fs = require('fs')
+const path = require('path')
 const { rateLimit } = require('express-rate-limit')
 const runtimeConfig = require('./config/env')
 const apiRoutes = require('./routes')
@@ -27,6 +29,29 @@ function createRateLimiter(config) {
   })
 }
 
+function serveProductionClient(app, config) {
+  if (!config.serveClient) return
+
+  const clientDistPath = config.clientDistPath
+  const indexPath = path.join(clientDistPath, 'index.html')
+  if (!fs.existsSync(indexPath)) {
+    throw new Error(`Built client was not found at ${indexPath}.`)
+  }
+
+  app.use(express.static(clientDistPath, {
+    index: false,
+    maxAge: '1y',
+    immutable: true,
+    setHeaders(response, filePath) {
+      if (path.basename(filePath) === 'index.html') response.set('Cache-Control', 'no-cache')
+    },
+  }))
+  app.get(/^(?!\/api(?:\/|$)).*/, (_request, response) => {
+    response.set('Cache-Control', 'no-cache')
+    response.sendFile(indexPath)
+  })
+}
+
 function createApp(config = runtimeConfig) {
   const app = express()
   app.disable('x-powered-by')
@@ -49,6 +74,7 @@ function createApp(config = runtimeConfig) {
   app.use('/api', apiRoutes)
 
   app.use('/api', notFound)
+  serveProductionClient(app, config)
   app.use(errorHandler)
   return app
 }
@@ -57,3 +83,4 @@ const app = createApp()
 module.exports = app
 module.exports.createApp = createApp
 module.exports.createRateLimiter = createRateLimiter
+module.exports.serveProductionClient = serveProductionClient

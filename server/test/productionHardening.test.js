@@ -1,5 +1,8 @@
 const assert = require('node:assert/strict')
 const { after, before, test } = require('node:test')
+const fs = require('node:fs/promises')
+const os = require('node:os')
+const path = require('node:path')
 const express = require('express')
 const { buildRuntimeConfig, validateProductionConfiguration } = require('../src/config/env')
 const { createApp } = require('../src/app')
@@ -124,6 +127,38 @@ test('HTTP hardening sets security headers, correlation IDs, and strict CORS', a
   assert.equal(denied.status, 403)
   assert.equal(payload.code, 'CORS_ORIGIN_DENIED')
   assert.match(payload.requestId, /^[0-9a-f-]{36}$/)
+})
+
+test('production client hosting serves SPA routes without masking API 404 responses', async (context) => {
+  const clientDistPath = await fs.mkdtemp(path.join(os.tmpdir(), 'drc-client-'))
+  await fs.writeFile(path.join(clientDistPath, 'index.html'), '<!doctype html><title>Movement System</title>')
+  await fs.writeFile(path.join(clientDistPath, 'app.js'), 'globalThis.appLoaded = true')
+
+  const clientServer = createApp({
+    ...baseConfig,
+    logRequests: false,
+    serveClient: true,
+    clientDistPath,
+  }).listen(0, '127.0.0.1')
+  await new Promise((resolve) => clientServer.once('listening', resolve))
+  context.after(async () => {
+    await new Promise((resolve, reject) => clientServer.close((error) => error ? reject(error) : resolve()))
+    await fs.rm(clientDistPath, { recursive: true, force: true })
+  })
+
+  const clientBaseUrl = `http://127.0.0.1:${clientServer.address().port}`
+  const routeResponse = await fetch(`${clientBaseUrl}/employee/movements/new`)
+  assert.equal(routeResponse.status, 200)
+  assert.match(await routeResponse.text(), /Movement System/)
+  assert.equal(routeResponse.headers.get('cache-control'), 'no-cache')
+
+  const assetResponse = await fetch(`${clientBaseUrl}/app.js`)
+  assert.equal(assetResponse.status, 200)
+  assert.match(assetResponse.headers.get('cache-control'), /immutable/)
+
+  const apiResponse = await fetch(`${clientBaseUrl}/api/does-not-exist`)
+  assert.equal(apiResponse.status, 404)
+  assert.match(apiResponse.headers.get('content-type'), /application\/json/)
 })
 
 test('HTTP hardening rejects invalid JSON and unsupported mutation content types with stable errors', async () => {
