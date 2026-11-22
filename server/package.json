@@ -6,6 +6,7 @@
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "start:production": "node src/tools/productionStart.js",
+    "start:review": "node src/tools/reviewStart.js",
     "production:check": "node src/tools/productionConfigCheck.js",
     "db:migrate": "node src/db/migrate.js",
     "db:postgres:migrate": "node src/tools/postgresMigrate.js",

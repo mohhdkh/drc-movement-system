@@ -52,9 +52,14 @@ from one origin when `SERVE_CLIENT=true`, which is the recommended review and pr
 public Entra browser settings as Docker build arguments and all server settings as runtime secrets. The runtime
 image runs as a non-root user and exposes `/api/health/live` through its container health check.
 
-The root `render.yaml` is a ready-to-use managed staging blueprint. It uses a paid, always-on web service so the
-pre-deploy migration command can run before traffic is shifted. During Blueprint creation, provide every value
-marked `sync: false`. Use the final HTTPS service URL for both `CLIENT_ORIGIN` and
+The root `render.yaml` is a free review-environment blueprint. Because free Render services do not support a
+separate pre-deploy migration command, `npm run start:review` applies idempotent, advisory-lock-protected
+PostgreSQL migrations before starting the API. Free instances can sleep after inactivity and are not approved
+for operational production use.
+
+For production, use `render.production.yaml` as the reference configuration: it uses paid, always-on compute and
+runs migrations in a separate pre-deploy phase before traffic is shifted. During Blueprint creation, provide
+every value marked `sync: false`. Use the final HTTPS service URL for both `CLIENT_ORIGIN` and
 `VITE_ENTRA_REDIRECT_URI`, and register that exact URL as a Single-page application redirect URI in Entra.
 
 The Entra values map as follows:

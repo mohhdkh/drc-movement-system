@@ -2,11 +2,11 @@ services:
   - type: web
     name: drc-movement-system
     runtime: docker
-    plan: 0.5c-512mb
+    plan: free
     region: frankfurt
     dockerfilePath: ./Dockerfile
     dockerContext: .
-    preDeployCommand: npm run db:postgres:migrate
+    dockerCommand: npm run start:review
     healthCheckPath: /api/health/ready
     autoDeployTrigger: checksPass
     maxShutdownDelaySeconds: 30

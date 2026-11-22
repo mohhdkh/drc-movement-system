@@ -83,7 +83,7 @@ flowchart TB
 | API | Node.js 24, Express 5 |
 | Authentication | Microsoft Entra ID with local role authority |
 | Data | PostgreSQL in production; SQLite for local development and migration tooling |
-| Delivery | Multi-stage Docker image, Render Blueprint, GitHub Actions CI |
+| Delivery | Multi-stage Docker image, free review and paid production Blueprints, GitHub Actions CI |
 | Integrations | Microsoft Graph / SharePoint, official Excel workbook export |
 
 ## Quality and security
@@ -108,7 +108,8 @@ flowchart TB
 ├── doc/                     # Official movement-plan workbook templates
 ├── artifacts/               # Verified delivery artifacts
 ├── Dockerfile               # Production multi-stage image
-├── render.yaml              # Managed staging/production blueprint
+├── render.yaml              # Free review-environment blueprint
+├── render.production.yaml   # Paid production blueprint
 └── PROJECT_SUMMARY.md       # Detailed Arabic project summary
 ```
 
@@ -170,14 +171,18 @@ Health endpoints:
 The repository ships as one production container that serves the client and API from a single HTTPS origin.
 This reduces cross-origin complexity and gives reviewers one canonical URL.
 
-The included `render.yaml` provides:
+The included free `render.yaml` provides:
 
 - Docker-based deployment from `main`
 - automatic deploys only after GitHub checks pass
 - a readiness health check before traffic is routed
-- PostgreSQL migrations before each release
+- idempotent PostgreSQL migrations during review-environment startup
 - graceful shutdown for zero-downtime rollout
 - secret placeholders for PostgreSQL and Microsoft Entra configuration
+
+It is intended only for review: Render can spin down a free service after inactivity, so the first request can
+take about a minute. `render.production.yaml` keeps migrations in a separate pre-deploy phase and uses an
+always-on paid compute plan for operational use.
 
 Production requires PostgreSQL over verified TLS and a Microsoft Entra application registration. Follow the
 [production runbook](server/docs/PRODUCTION_DEPLOYMENT.md) before sharing a live review link.
