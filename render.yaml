@@ -9,7 +9,6 @@ services:
     dockerCommand: npm run start:review
     healthCheckPath: /api/health/ready
     autoDeployTrigger: checksPass
-    maxShutdownDelaySeconds: 30
     envVars:
       - key: NODE_ENV
         value: production
