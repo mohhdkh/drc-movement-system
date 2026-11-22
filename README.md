@@ -19,6 +19,7 @@
 </p>
 
 <p align="center">
+  <a href="#live-demo">Live demo</a> ·
   <a href="#overview">Overview</a> ·
   <a href="#workflow">Workflow</a> ·
   <a href="#architecture">Architecture</a> ·
@@ -28,6 +29,17 @@
 </p>
 
 ---
+
+## Live demo
+
+Review the deployed application at **[drc-movement-system.onrender.com](https://drc-movement-system.onrender.com/)**.
+
+| Credential | Value |
+| --- | --- |
+| Username | `drc-review` |
+| Password | `HpyF0KYlDvw0L5ku` |
+
+This is a shared review environment with synthetic demo data only. Do not enter real personnel or operational data.
 
 ## Overview
 
