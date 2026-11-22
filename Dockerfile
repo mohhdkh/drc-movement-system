@@ -24,7 +24,10 @@ FROM node:22-bookworm-slim AS server-dependencies
 WORKDIR /app/server
 
 COPY server/package.json server/package-lock.json ./
-RUN npm ci --omit=dev && npm cache clean --force
+# better-sqlite3 v13 ships native binaries; skip npm's implicit node-gyp rebuild and smoke-test the binary.
+RUN npm ci --omit=dev --ignore-scripts \
+    && node -e "const Database = require('better-sqlite3'); const db = new Database(':memory:'); db.close()" \
+    && npm cache clean --force
 
 FROM node:22-bookworm-slim AS runtime
 ENV NODE_ENV=production \
