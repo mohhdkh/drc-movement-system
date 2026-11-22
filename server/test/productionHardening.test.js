@@ -144,7 +144,7 @@ test('HTTP hardening sets security headers, correlation IDs, and strict CORS', a
   assert.match(payload.requestId, /^[0-9a-f-]{36}$/)
 })
 
-test('review environments require valid HTTP Basic credentials before serving any route', async (context) => {
+test('review environments expose health probes but require HTTP Basic credentials elsewhere', async (context) => {
   const reviewServer = createApp({
     ...baseConfig,
     authProvider: 'review',
@@ -159,19 +159,24 @@ test('review environments require valid HTTP Basic credentials before serving an
   }))
 
   const reviewBaseUrl = `http://127.0.0.1:${reviewServer.address().port}`
-  const anonymous = await fetch(`${reviewBaseUrl}/api/health/live`)
+  const live = await fetch(`${reviewBaseUrl}/api/health/live`)
+  const ready = await fetch(`${reviewBaseUrl}/api/health/ready`)
+  assert.equal(live.status, 200)
+  assert.equal(ready.status, 200)
+
+  const anonymous = await fetch(`${reviewBaseUrl}/api/not-found`)
   assert.equal(anonymous.status, 401)
   assert.match(anonymous.headers.get('www-authenticate'), /^Basic /)
 
-  const wrong = await fetch(`${reviewBaseUrl}/api/health/live`, {
+  const wrong = await fetch(`${reviewBaseUrl}/api/not-found`, {
     headers: { Authorization: `Basic ${Buffer.from('reviewer:wrong-password').toString('base64')}` },
   })
   assert.equal(wrong.status, 401)
 
-  const authorized = await fetch(`${reviewBaseUrl}/api/health/live`, {
+  const authorized = await fetch(`${reviewBaseUrl}/api/not-found`, {
     headers: { Authorization: `Basic ${Buffer.from('reviewer:unique-review-password').toString('base64')}` },
   })
-  assert.equal(authorized.status, 200)
+  assert.equal(authorized.status, 404)
 })
 
 test('production client hosting serves SPA routes without masking API 404 responses', async (context) => {

@@ -1,5 +1,7 @@
 const { timingSafeEqual } = require('crypto')
 
+const PUBLIC_HEALTH_PATHS = new Set(['/api/health/live', '/api/health/ready'])
+
 function safeEqual(leftValue, rightValue) {
   const left = Buffer.from(String(leftValue))
   const right = Buffer.from(String(rightValue))
@@ -27,6 +29,10 @@ function createReviewAccess(config) {
   if (config.authProvider !== 'review') return (_request, _response, next) => next()
 
   return function reviewAccess(request, response, next) {
+    if ((request.method === 'GET' || request.method === 'HEAD') && PUBLIC_HEALTH_PATHS.has(request.path)) {
+      return next()
+    }
+
     const credentials = decodeBasicCredentials(request.get('authorization'))
     if (credentials &&
         safeEqual(credentials.username, config.reviewAccessUsername) &&
@@ -39,4 +45,4 @@ function createReviewAccess(config) {
   }
 }
 
-module.exports = { createReviewAccess, decodeBasicCredentials, safeEqual }
+module.exports = { PUBLIC_HEALTH_PATHS, createReviewAccess, decodeBasicCredentials, safeEqual }
