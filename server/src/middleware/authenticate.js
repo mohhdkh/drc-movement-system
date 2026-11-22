@@ -31,6 +31,13 @@ function resolveDevelopmentUser(request, defaultUserId) {
   return user
 }
 
+function resolveReviewUser(defaultUserId) {
+  const user = users.find((candidate) => candidate.id === defaultUserId)
+  if (!user) throw new AppError('The review user is not registered.', 401, undefined, 'ACCOUNT_NOT_LINKED')
+  if (!user.active) throw new AppError('The review user is inactive.', 403, undefined, 'ACCOUNT_INACTIVE')
+  return user
+}
+
 function extractBearerToken(request) {
   const authorization = request.get('authorization') || ''
   const match = authorization.match(/^Bearer ([^\s]+)$/)
@@ -53,6 +60,8 @@ function authenticate({ developmentUserId = 'emp-001', roles = [], provider = au
       let user
       if (provider === 'development') {
         user = resolveDevelopmentUser(request, developmentUserId)
+      } else if (provider === 'review') {
+        user = resolveReviewUser(developmentUserId)
       } else if (provider === 'entra') {
         const identity = await (tokenVerifier || getEntraVerifier()).verify(extractBearerToken(request))
         user = await resolveEntraUser(identity)
@@ -73,5 +82,6 @@ module.exports = {
   authenticate,
   extractBearerToken,
   resolveDevelopmentUser,
+  resolveReviewUser,
   setEntraTokenVerifierForTests,
 }

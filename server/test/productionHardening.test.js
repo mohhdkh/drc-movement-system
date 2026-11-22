@@ -54,6 +54,21 @@ test('production configuration is explicit, PostgreSQL-only, HTTPS-only, and TLS
   assert.throws(() => validateProductionConfiguration(config, {
     ...environment, DATABASE_URL: 'postgresql://user:example@db.example.org/app?sslmode=disable',
   }), /certificate-verified TLS/)
+
+  const reviewEnvironment = {
+    ...environment,
+    AUTH_PROVIDER: 'review',
+    REVIEW_MODE: 'true',
+    REVIEW_ACCESS_USERNAME: 'reviewer',
+    REVIEW_ACCESS_PASSWORD: 'unique-review-password',
+  }
+  const reviewConfig = buildRuntimeConfig(reviewEnvironment, { isTestProcess: false })
+  assert.equal(validateProductionConfiguration(reviewConfig, reviewEnvironment), reviewConfig)
+  assert.equal(reviewConfig.authProvider, 'review')
+  assert.throws(() => validateProductionConfiguration(
+    buildRuntimeConfig({ ...reviewEnvironment, REVIEW_ACCESS_PASSWORD: 'too-short' }, { isTestProcess: false }),
+    { ...reviewEnvironment, REVIEW_ACCESS_PASSWORD: 'too-short' },
+  ), /at least 16 characters/)
 })
 
 test('PostgreSQL URL TLS parameters are normalized without weakening verification', () => {
@@ -127,6 +142,36 @@ test('HTTP hardening sets security headers, correlation IDs, and strict CORS', a
   assert.equal(denied.status, 403)
   assert.equal(payload.code, 'CORS_ORIGIN_DENIED')
   assert.match(payload.requestId, /^[0-9a-f-]{36}$/)
+})
+
+test('review environments require valid HTTP Basic credentials before serving any route', async (context) => {
+  const reviewServer = createApp({
+    ...baseConfig,
+    authProvider: 'review',
+    reviewMode: true,
+    reviewAccessUsername: 'reviewer',
+    reviewAccessPassword: 'unique-review-password',
+    logRequests: false,
+  }).listen(0, '127.0.0.1')
+  await new Promise((resolve) => reviewServer.once('listening', resolve))
+  context.after(() => new Promise((resolve, reject) => {
+    reviewServer.close((error) => error ? reject(error) : resolve())
+  }))
+
+  const reviewBaseUrl = `http://127.0.0.1:${reviewServer.address().port}`
+  const anonymous = await fetch(`${reviewBaseUrl}/api/health/live`)
+  assert.equal(anonymous.status, 401)
+  assert.match(anonymous.headers.get('www-authenticate'), /^Basic /)
+
+  const wrong = await fetch(`${reviewBaseUrl}/api/health/live`, {
+    headers: { Authorization: `Basic ${Buffer.from('reviewer:wrong-password').toString('base64')}` },
+  })
+  assert.equal(wrong.status, 401)
+
+  const authorized = await fetch(`${reviewBaseUrl}/api/health/live`, {
+    headers: { Authorization: `Basic ${Buffer.from('reviewer:unique-review-password').toString('base64')}` },
+  })
+  assert.equal(authorized.status, 200)
 })
 
 test('production client hosting serves SPA routes without masking API 404 responses', async (context) => {

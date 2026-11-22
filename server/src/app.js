@@ -11,6 +11,7 @@ const { errorHandler } = require('./middleware/errorHandler')
 const { refreshOperationalData } = require('./middleware/refreshOperationalData')
 const { createRequestContext } = require('./middleware/requestContext')
 const { requireJsonContentType } = require('./middleware/httpHardening')
+const { createReviewAccess } = require('./middleware/reviewAccess')
 const { AppError } = require('./utils/AppError')
 
 function createRateLimiter(config) {
@@ -59,6 +60,7 @@ function createApp(config = runtimeConfig) {
 
   app.use(createRequestContext({ enabled: config.logRequests }))
   app.use(helmet({ strictTransportSecurity: config.isProduction ? undefined : false }))
+  app.use(createReviewAccess(config))
   app.use(cors({
     origin(origin, callback) {
       if (!origin || config.clientOrigins.includes(origin)) return callback(null, true)

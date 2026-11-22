@@ -5,7 +5,7 @@ const JWT_VALUE = /\beyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*\b/g
 function redactString(value) {
   let result = value.replace(CONNECTION_URL, '[REDACTED_DATABASE_URL]')
   result = result.replace(JWT_VALUE, '[REDACTED_JWT]')
-  for (const name of ['DATABASE_URL', 'PGPASSWORD', 'MS_CLIENT_SECRET']) {
+  for (const name of ['DATABASE_URL', 'PGPASSWORD', 'MS_CLIENT_SECRET', 'REVIEW_ACCESS_PASSWORD']) {
     const secret = process.env[name]
     if (secret && secret.length >= 4) result = result.split(secret).join('[REDACTED]')
   }

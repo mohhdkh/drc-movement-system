@@ -39,26 +39,14 @@ services:
       - key: CLIENT_DIST_PATH
         value: /app/client/dist
       - key: AUTH_PROVIDER
-        value: entra
-      - key: ENTRA_TENANT_ID
+        value: review
+      - key: REVIEW_MODE
+        value: "true"
+      - key: REVIEW_ACCESS_USERNAME
         sync: false
-      - key: ENTRA_CLIENT_ID
-        sync: false
-      - key: ENTRA_AUDIENCE
-        sync: false
-      - key: ENTRA_ISSUER
-        sync: false
-      - key: ENTRA_ALLOWED_TENANT_ID
+      - key: REVIEW_ACCESS_PASSWORD
         sync: false
       - key: VITE_AUTH_PROVIDER
-        value: entra
-      - key: VITE_ENTRA_CLIENT_ID
-        sync: false
-      - key: VITE_ENTRA_TENANT_ID
-        sync: false
-      - key: VITE_ENTRA_REDIRECT_URI
-        sync: false
-      - key: VITE_ENTRA_API_SCOPE
-        sync: false
+        value: development
       - key: MS_SHAREPOINT_ENV_ENABLED
         value: "false"

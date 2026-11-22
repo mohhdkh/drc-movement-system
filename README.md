@@ -88,7 +88,7 @@ flowchart TB
 
 ## Quality and security
 
-- 161 automated tests across client and server
+- 162 automated tests across client and server
 - TypeScript build and Oxlint checks on every pull request
 - Strict CORS allowlist, Helmet headers, JSON/content limits, and production rate limiting
 - Cryptographic Entra access-token verification with bounded metadata retries
@@ -178,11 +178,13 @@ The included free `render.yaml` provides:
 - a readiness health check before traffic is routed
 - idempotent PostgreSQL migrations during review-environment startup
 - graceful shutdown for zero-downtime rollout
-- secret placeholders for PostgreSQL and Microsoft Entra configuration
+- secret placeholders for PostgreSQL and temporary review credentials
+- shared HTTP Basic access for an explicitly temporary review environment
 
 It is intended only for review: Render can spin down a free service after inactivity, so the first request can
-take about a minute. `render.production.yaml` keeps migrations in a separate pre-deploy phase and uses an
-always-on paid compute plan for operational use.
+take about a minute. The review username and a unique 16+ character password are stored only in Render and the
+API uses fixed demo identities for each role workspace. `render.production.yaml` keeps migrations in a separate
+pre-deploy phase, requires Microsoft Entra ID, and uses an always-on paid compute plan for operational use.
 
 Production requires PostgreSQL over verified TLS and a Microsoft Entra application registration. Follow the
 [production runbook](server/docs/PRODUCTION_DEPLOYMENT.md) before sharing a live review link.

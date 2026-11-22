@@ -52,8 +52,8 @@ function buildRuntimeConfig(env = process.env, options = {}) {
   const clientOrigins = parseOrigins(env.CLIENT_ORIGIN, 'http://localhost:5173')
   const movementTimeZone = env.MOVEMENT_TIMEZONE || 'Asia/Gaza'
   const authProvider = String(env.AUTH_PROVIDER || env.AUTH_MODE || 'development').toLowerCase()
-  if (!['development', 'entra'].includes(authProvider)) {
-    throw new Error('AUTH_PROVIDER must be development or entra.')
+  if (!['development', 'entra', 'review'].includes(authProvider)) {
+    throw new Error('AUTH_PROVIDER must be development, entra, or review.')
   }
   if (!validTimeZone(movementTimeZone)) throw new Error('MOVEMENT_TIMEZONE must be a valid IANA timezone.')
 
@@ -62,6 +62,9 @@ function buildRuntimeConfig(env = process.env, options = {}) {
     isProduction: nodeEnv === 'production',
     authProvider,
     authMode: authProvider,
+    reviewMode: boolean(env.REVIEW_MODE, false),
+    reviewAccessUsername: String(env.REVIEW_ACCESS_USERNAME || '').trim(),
+    reviewAccessPassword: String(env.REVIEW_ACCESS_PASSWORD || ''),
     host: env.HOST || '0.0.0.0',
     port: integer(env.PORT, 5000, 'PORT', { min: 1, max: 65535 }),
     clientOrigin: clientOrigins[0],
@@ -92,10 +95,20 @@ function validateProductionConfiguration(config, env = process.env) {
   const missing = required.filter((name) => !String(env[name] || '').trim())
   if (missing.length) throw new Error(`Production configuration is missing: ${missing.join(', ')}.`)
   if (config.databaseProvider !== 'postgres') throw new Error('Production requires DATABASE_PROVIDER=postgres.')
-  if (config.authProvider !== 'entra') throw new Error('Production requires AUTH_PROVIDER=entra.')
-  const { getEntraConfig, validateEntraConfig } = require('./entra')
-  const entraErrors = validateEntraConfig(getEntraConfig(env))
-  if (entraErrors.length) throw new Error(`Production Entra configuration is incomplete: ${entraErrors.join(', ')}.`)
+  if (config.authProvider === 'review') {
+    if (!config.reviewMode) throw new Error('Production review authentication requires REVIEW_MODE=true.')
+    if (config.reviewAccessUsername.length < 3 || /[:\r\n]/.test(config.reviewAccessUsername)) {
+      throw new Error('REVIEW_ACCESS_USERNAME must contain at least 3 characters and cannot contain a colon.')
+    }
+    if (config.reviewAccessPassword.length < 16) {
+      throw new Error('REVIEW_ACCESS_PASSWORD must contain at least 16 characters.')
+    }
+  } else {
+    if (config.authProvider !== 'entra') throw new Error('Production requires AUTH_PROVIDER=entra or explicit review mode.')
+    const { getEntraConfig, validateEntraConfig } = require('./entra')
+    const entraErrors = validateEntraConfig(getEntraConfig(env))
+    if (entraErrors.length) throw new Error(`Production Entra configuration is incomplete: ${entraErrors.join(', ')}.`)
+  }
   const databaseUrl = String(env.DATABASE_URL)
   if (/sslmode=disable/i.test(databaseUrl) || /^(0|false|no|disable|disabled)$/i.test(String(env.PGSSL || ''))) {
     throw new Error('Production PostgreSQL connections must use certificate-verified TLS.')

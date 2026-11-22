@@ -55,7 +55,9 @@ image runs as a non-root user and exposes `/api/health/live` through its contain
 The root `render.yaml` is a free review-environment blueprint. Because free Render services do not support a
 separate pre-deploy migration command, `npm run start:review` applies idempotent, advisory-lock-protected
 PostgreSQL migrations before starting the API. Free instances can sleep after inactivity and are not approved
-for operational production use.
+for operational production use. The review Blueprint uses HTTP Basic access in front of fixed local demo
+identities. Set a unique `REVIEW_ACCESS_USERNAME` and a password of at least 16 characters in Render; never reuse
+an institutional password. This review-only authentication mode must not be used for operational deployment.
 
 For production, use `render.production.yaml` as the reference configuration: it uses paid, always-on compute and
 runs migrations in a separate pre-deploy phase before traffic is shifted. During Blueprint creation, provide
